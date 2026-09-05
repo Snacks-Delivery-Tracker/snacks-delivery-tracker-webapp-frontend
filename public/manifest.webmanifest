@@ -1,0 +1,12 @@
+{
+  "name": "Snacks Delivery Tracker",
+  "short_name": "Snack Tracker",
+  "description": "Track snack deliveries, collections, and pending payments.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#1d4ed8",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

@@ -1,0 +1,12 @@
+import { Download, Printer, Share2 } from 'lucide-react';
+import { useLine } from '../contexts/LineContext';
+import { AmountTriplet, LoadingState, PageHeader, PrimaryButton } from '../components/Page';
+import { formatDate } from '../utils/format';
+
+export function ReportPreviewPage() {
+  const { line, isLoading } = useLine();
+  if (isLoading) return <LoadingState />;
+  if (!line) return <div className="pt-10 text-center text-sm text-slate-500">There is no active line to report.</div>;
+  const share = () => navigator.share?.({ title: 'Line Summary', text: `Total ₹${line.summary.totalAmount} · Collected ₹${line.summary.collectedAmount}` });
+  return <><PageHeader title="Line Summary" back action={<button onClick={share} aria-label="Share report"><Share2 size={19} /></button>} /><article className="print-sheet rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><div className="border-b-2 border-slate-800 pb-4 text-center"><h1 className="text-sm font-black text-slate-900">LINE SUMMARY REPORT</h1><p className="mt-1 text-[11px] text-slate-500">{formatDate(line.deliveryDate || line.createdAt)}</p></div><table className="mt-4 w-full text-left text-[11px]"><thead className="border-y border-slate-300 bg-slate-50 text-slate-600"><tr><th className="px-1 py-2">#</th><th className="px-1 py-2">Shop</th><th className="px-1 py-2 text-right">Total</th><th className="px-1 py-2 text-right">Collected</th><th className="px-1 py-2 text-right">Pending</th></tr></thead><tbody>{line.shops.map((shop, index) => <tr key={shop._id} className="border-b border-slate-100"><td className="px-1 py-2">{index + 1}</td><td className="px-1 py-2">{shop.name}</td><td className="px-1 py-2 text-right">₹{shop.totalAmount}</td><td className="px-1 py-2 text-right text-emerald-600">₹{shop.collectedAmount}</td><td className="px-1 py-2 text-right text-red-500">₹{shop.pendingAmount}</td></tr>)}</tbody></table><div className="mt-5 border-t border-slate-300 pt-4"><AmountTriplet total={line.summary.totalAmount} collected={line.summary.collectedAmount} pending={line.summary.pendingAmount} /></div></article><div className="mt-5 grid grid-cols-2 gap-3 print:hidden"><PrimaryButton onClick={() => window.print()}><Printer size={18} /> Print / save PDF</PrimaryButton><button onClick={() => window.print()} className="flex min-h-12 items-center justify-center gap-2 rounded-xl border border-blue-200 bg-white text-sm font-bold text-blue-700"><Download size={18} /> Download PDF</button></div></>;
+}
