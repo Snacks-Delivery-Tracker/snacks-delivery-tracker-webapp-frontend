@@ -148,17 +148,24 @@ export function LineBillPreviewPage() {
                           </thead>
                           <tbody>
                             {order.items && order.items.length > 0 ? (
-                              order.items.map((item, itemIdx) => (
-                                <tr key={item._id || itemIdx} className="border-b border-slate-100">
-                                  <td className="px-1.5 py-2">{itemIdx + 1}</td>
-                                  <td className="px-1.5 py-2 font-medium text-slate-800">
-                                    {item.snackId?.name || 'Snack Item'}
-                                  </td>
-                                  <td className="px-1.5 py-2 text-right">{item.orderedQuantity}</td>
-                                  <td className="px-1.5 py-2 text-right">₹{item.unitPrice}</td>
-                                  <td className="px-1.5 py-2 text-right font-bold text-slate-800">₹{item.totalPrice}</td>
+                              <>
+                                {order.items.map((item, itemIdx) => (
+                                  <tr key={item._id || itemIdx} className="border-b border-slate-100">
+                                    <td className="px-1.5 py-2">{itemIdx + 1}</td>
+                                    <td className="px-1.5 py-2 font-medium text-slate-800">
+                                      {item.snackId?.name || 'Snack Item'}
+                                    </td>
+                                    <td className="px-1.5 py-2 text-right">{item.orderedQuantity}</td>
+                                    <td className="px-1.5 py-2 text-right">₹{item.unitPrice}</td>
+                                    <td className="px-1.5 py-2 text-right font-bold text-slate-800">₹{item.totalPrice}</td>
+                                  </tr>
+                                ))}
+                                <tr className="border-t border-slate-300 font-bold text-slate-800">
+                                  <td colSpan="2" className="px-1.5 py-2 text-right">Total Qty:</td>
+                                  <td className="px-1.5 py-2 text-right">{order.items.reduce((sum, item) => sum + item.orderedQuantity, 0)}</td>
+                                  <td colSpan="2"></td>
                                 </tr>
-                              ))
+                              </>
                             ) : (
                               <tr className="border-b border-slate-100">
                                 <td colSpan="4" className="px-1.5 py-2 text-slate-500 italic">Quick Amount Delivery</td>

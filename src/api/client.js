@@ -26,6 +26,9 @@ export const api = {
   addShopToLine: (lineId, shopId) => request(`/line/${lineId}/shops`, {
     method: 'POST', body: JSON.stringify({ shopId })
   }),
+  bulkAddShopsToLine: (lineId, shopIds) => request(`/line/${lineId}/shops/bulk`, {
+    method: 'POST', body: JSON.stringify({ shopIds })
+  }),
   removeShopFromLine: (lineId, shopId) => request(`/line/${lineId}/shops/${shopId}`, {
     method: 'DELETE'
   }),
@@ -34,6 +37,7 @@ export const api = {
     method: 'POST', body: JSON.stringify({ lineId })
   }),
   listShops: (search = '') => request(`/shop${search ? `?search=${encodeURIComponent(search)}` : ''}`),
+  listShopsByWeekday: (weekday) => request(`/shop/by-weekday/${weekday}`),
   getShop: (shopId) => request(`/shop/${shopId}`),
   createShop: (data) => request('/shop', { method: 'POST', body: JSON.stringify(data) }),
   updateShop: (shopId, data) => request(`/shop/${shopId}`, { method: 'PUT', body: JSON.stringify(data) }),

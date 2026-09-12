@@ -3,7 +3,9 @@ import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
 import { useLine } from '../contexts/LineContext';
 import { AmountTriplet, ErrorState, LoadingState, PrimaryButton } from '../components/Page';
+import { CreateLineModal } from '../components/CreateLineModal';
 import { formatTime, todayLabel } from '../utils/format';
+import { useState } from 'react';
 
 export function HomePage() {
   const { line, isLoading, error, refreshLine } = useLine();
@@ -11,17 +13,7 @@ export function HomePage() {
   const recentOrders = line?.shops.flatMap((shop) => shop.orders.map((order) => ({ ...order, shop })))
     .sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate)).slice(0, 4) || [];
 
-  const startLine = async () => {
-    try {
-      const now = new Date();
-      const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      const newLine = await api.createLine({ lineName: `Delivery line · ${todayLabel()} (${timeStr})`, deliveryDate: now.toISOString() });
-      await refreshLine(newLine._id);
-      navigate('/line');
-    } catch (requestError) {
-      window.alert(requestError.message);
-    }
-  };
+  const [showCreateModal, setShowCreateModal] = useState(false);
 
   if (isLoading) return <LoadingState />;
   if (error) return <ErrorState message={error} retry={() => refreshLine()} />;
@@ -42,7 +34,7 @@ export function HomePage() {
         </div>
         <AmountTriplet total={line.summary.totalAmount} collected={line.summary.collectedAmount} pending={line.summary.pendingAmount} />
         <div className="mt-5 space-y-2">
-          <PrimaryButton className="w-full" onClick={startLine}><Plus size={18} /> Start new delivery line</PrimaryButton>
+          <PrimaryButton className="w-full" onClick={() => setShowCreateModal(true)}><Plus size={18} /> Start new delivery line</PrimaryButton>
           <div className="flex gap-2">
             <button type="button" onClick={() => navigate('/line')} className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-100">View Lines</button>
             <button type="button" onClick={() => navigate('/shops')} className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-100">Shops/Snacks</button>
@@ -50,9 +42,11 @@ export function HomePage() {
         </div>
       </> : <>
         <div className="flex items-start gap-3"><div className="rounded-xl bg-blue-50 p-3 text-blue-700"><Route size={24} /></div><div><h1 className="text-base font-extrabold text-slate-900">Start new delivery line</h1><p className="mt-1 text-sm leading-5 text-slate-500">Create a new delivery route run, add shops, and record collections.</p></div></div>
-        <PrimaryButton className="mt-5 w-full" onClick={startLine}><Plus size={18} /> Start new delivery line</PrimaryButton>
+        <PrimaryButton className="mt-5 w-full" onClick={() => setShowCreateModal(true)}><Plus size={18} /> Start new delivery line</PrimaryButton>
       </>}
     </section>
+
+    {showCreateModal && <CreateLineModal onClose={() => setShowCreateModal(false)} refreshLine={refreshLine} />}
 
     {line && <section className="mt-7">
       <div className="mb-3 flex items-center justify-between"><h2 className="text-sm font-extrabold text-slate-900">Recent deliveries</h2><Link to="/line" className="flex items-center gap-0.5 text-xs font-bold text-blue-700">View all <ChevronRight size={14} /></Link></div>

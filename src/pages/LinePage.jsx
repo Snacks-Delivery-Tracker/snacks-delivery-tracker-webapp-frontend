@@ -17,6 +17,7 @@ import { useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
 import { useLine } from '../contexts/LineContext';
 import { ConfirmDialog, ErrorState, LoadingState, PageHeader, PrimaryButton } from '../components/Page';
+import { CreateLineModal } from '../components/CreateLineModal';
 import { formatDate, todayLabel } from '../utils/format';
 
 /* ─────────────────────────────────────────────────────────────────────────── */
@@ -124,6 +125,22 @@ function CollectPaymentModal({ shop, lineId, onClose, onSuccess }) {
           </div>
         </div>
 
+        {shop.paymentBreakdown && paid > 0 && (
+          <div className="mb-4 rounded-xl border border-slate-100 bg-slate-50/50 p-3">
+            <h4 className="mb-2 text-[10px] font-bold uppercase text-slate-500">Payment Breakdown</h4>
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              {Object.entries(shop.paymentBreakdown)
+                .filter(([_, amount]) => amount > 0)
+                .map(([mode, amount]) => (
+                  <div key={mode} className="flex justify-between">
+                    <span className="font-semibold text-slate-600">{mode}</span>
+                    <span className="font-bold text-slate-800">₹{amount}</span>
+                  </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {orderId && (
           <div className="mb-4">
             <button
@@ -210,6 +227,7 @@ function CollectPaymentModal({ shop, lineId, onClose, onSuccess }) {
               >
                 <option value="CASH">💵  Cash</option>
                 <option value="UPI">📱  UPI</option>
+                <option value="CARD">💳  Card</option>
                 <option value="CHEQUE">🏦  Cheque</option>
                 <option value="BANK_TRANSFER">🔁  Bank Transfer</option>
               </select>
@@ -263,9 +281,13 @@ function ShopPaymentRow({ shop, lineId, isOpen, onRemove, removing, onPaymentCol
       cardBorderClass = 'border-amber-200 bg-amber-50/40';
       statusDot = <span className="h-2 w-2 rounded-full bg-amber-500 shrink-0 animate-pulse" title="Partially paid" />;
     } else if (isUnpaid) {
-      cardBorderClass = 'border-red-200 bg-red-50/30';
-      statusDot = <span className="h-2 w-2 rounded-full bg-red-500 shrink-0 animate-pulse" title="Unpaid" />;
+      cardBorderClass = 'border-amber-200 bg-amber-50/30';
+      statusDot = <span className="h-2 w-2 rounded-full bg-amber-500 shrink-0 animate-pulse" title="Unpaid" />;
     }
+  } else if (shop.lineSummary?.startingOutstanding > 0) {
+      // Just manually loaded, no delivery yet
+  } else if (shop.deliveryWeekday) { // Or we could check line summary lineType, but weekday logic is simpler if we assume weekday loaded has red card
+      cardBorderClass = 'border-red-400 bg-red-50/50';
   }
 
   const handleRowClick = () => {
@@ -698,7 +720,7 @@ export function LinePage() {
   const [error, setError] = useState('');
   const [expandedLineId, setExpandedLineId] = useState(null);
   const [statusFilter, setStatusFilter] = useState('ALL');
-  const [creating, setCreating] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
   const { refreshLine } = useLine();
 
   const loadAllLines = async () => {
@@ -721,25 +743,6 @@ export function LinePage() {
     loadAllLines();
   }, []);
 
-  const createNewLine = async () => {
-    setCreating(true);
-    try {
-      const now = new Date();
-      const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      const newLine = await api.createLine({
-        lineName: `Delivery line · ${todayLabel()} (${timeStr})`,
-        deliveryDate: now.toISOString(),
-      });
-      await refreshLine(newLine._id);
-      await loadAllLines();
-      setExpandedLineId(newLine._id);
-    } catch (err) {
-      window.alert(err.message);
-    } finally {
-      setCreating(false);
-    }
-  };
-
   if (loading) return <LoadingState label="Loading delivery lines…" />;
   if (error) return <ErrorState message={error} retry={loadAllLines} />;
 
@@ -754,12 +757,11 @@ export function LinePage() {
         subtitle={`${lines.length} total lines recorded`}
         action={
           <button
-            onClick={createNewLine}
-            disabled={creating}
-            className="flex items-center gap-1.5 rounded-lg bg-white/15 px-3 py-1.5 text-xs font-bold text-white hover:bg-white/25 disabled:opacity-50"
+            onClick={() => setShowCreateModal(true)}
+            className="flex items-center gap-1.5 rounded-lg bg-white/15 px-3 py-1.5 text-xs font-bold text-white hover:bg-white/25"
           >
             <Plus size={15} />
-            {creating ? 'Creating…' : 'New Line'}
+            New Line
           </button>
         }
       />
@@ -769,7 +771,7 @@ export function LinePage() {
           <ClipboardList className="mx-auto text-slate-300" size={42} />
           <h1 className="mt-4 text-base font-extrabold text-slate-800">No delivery lines yet</h1>
           <p className="mt-1 text-xs text-slate-500">Click below to start your first delivery route.</p>
-          <PrimaryButton onClick={createNewLine} loading={creating} className="mt-5 w-full">
+          <PrimaryButton onClick={() => setShowCreateModal(true)} className="mt-5 w-full">
             <Plus size={18} /> Start New Delivery Line
           </PrimaryButton>
         </div>
@@ -814,6 +816,8 @@ export function LinePage() {
           )}
         </section>
       )}
+
+      {showCreateModal && <CreateLineModal onClose={() => setShowCreateModal(false)} refreshLine={async (lineId) => { await refreshLine(lineId); await loadAllLines(); setExpandedLineId(lineId); }} />}
 
       <style>{`
         @keyframes slide-up {

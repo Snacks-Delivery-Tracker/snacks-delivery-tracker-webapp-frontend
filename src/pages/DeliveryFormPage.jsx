@@ -53,6 +53,7 @@ export function DeliveryFormPage({ editing = false }) {
 
   const selectedItems = useMemo(() => items.map((item) => ({ ...item, snack: snacks.find((snack) => snack._id === item.snackId) })).filter((item) => item.snack), [items, snacks]);
   const itemTotal = useMemo(() => selectedItems.reduce((sum, item) => sum + item.quantity * item.snack.sellingPrice, 0), [selectedItems]);
+  const quantityTotal = useMemo(() => selectedItems.reduce((sum, item) => sum + item.quantity, 0), [selectedItems]);
   const actualTotal = mode === 'ITEMIZED' ? itemTotal : Number(totalAmount || 0);
   const collectionValue = Number(collectedAmount || 0);
   const pendingAmount = Math.max(0, actualTotal - collectionValue);
@@ -148,8 +149,12 @@ export function DeliveryFormPage({ editing = false }) {
         )}
 
         {mode === 'ITEMIZED' && (
-          <section className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+          <section className="rounded-xl border border-slate-200 bg-slate-50 p-3 space-y-1">
             <div className="flex justify-between text-sm font-bold text-slate-800">
+              <span>Total quantity</span>
+              <span>{quantityTotal}</span>
+            </div>
+            <div className="flex justify-between text-sm font-bold text-slate-800 border-t border-slate-200 pt-1">
               <span>Total amount</span>
               <span>{formatCurrency(itemTotal)}</span>
             </div>
@@ -181,6 +186,7 @@ export function DeliveryFormPage({ editing = false }) {
             >
               <option value="CASH">Cash</option>
               <option value="UPI">UPI</option>
+              <option value="CARD">Card</option>
               <option value="BANK_TRANSFER">Bank transfer</option>
               <option value="CHEQUE">Cheque</option>
             </select>

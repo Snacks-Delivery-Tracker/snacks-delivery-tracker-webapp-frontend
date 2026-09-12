@@ -14,7 +14,7 @@ export function ShopDetailsPage() {
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [form, setForm] = useState({ name: '', ownerName: '', ownerNumber: '', ownerEmail: '', address: '' });
+  const [form, setForm] = useState({ name: '', ownerName: '', ownerNumber: '', ownerEmail: '', address: '', deliveryWeekday: '' });
 
   const loadData = async () => {
     try {
@@ -26,7 +26,8 @@ export function ShopDetailsPage() {
           ownerName: history.shop.ownerName || '',
           ownerNumber: history.shop.ownerNumber || '',
           ownerEmail: history.shop.ownerEmail || '',
-          address: history.shop.address || ''
+          address: history.shop.address || '',
+          deliveryWeekday: history.shop.deliveryWeekday || ''
         });
       }
     } catch (requestError) {
@@ -104,6 +105,7 @@ export function ShopDetailsPage() {
           <Field label="Phone Number" value={form.ownerNumber} onChange={(v) => setForm({ ...form, ownerNumber: v })} type="tel" required />
           <Field label="Email (optional)" value={form.ownerEmail} onChange={(v) => setForm({ ...form, ownerEmail: v })} type="email" />
           <Field label="Address" value={form.address} onChange={(v) => setForm({ ...form, address: v })} required />
+          <SelectField label="Delivery Weekday (Optional)" value={form.deliveryWeekday} onChange={(v) => setForm({ ...form, deliveryWeekday: v })} options={[ { label: 'None', value: '' }, { label: 'Monday', value: 'Monday' }, { label: 'Tuesday', value: 'Tuesday' }, { label: 'Wednesday', value: 'Wednesday' }, { label: 'Thursday', value: 'Thursday' }, { label: 'Friday', value: 'Friday' }, { label: 'Saturday', value: 'Saturday' }, { label: 'Sunday', value: 'Sunday' } ]} />
 
           <div className="flex gap-2 pt-2">
             <PrimaryButton type="submit" loading={saving} className="flex-1">
@@ -132,6 +134,11 @@ export function ShopDetailsPage() {
               {shop.ownerEmail && (
                 <p className="mt-0.5 text-xs text-slate-400">
                   {shop.ownerEmail}
+                </p>
+              )}
+              {shop.deliveryWeekday && (
+                <p className="mt-2 inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-semibold text-blue-700 ring-1 ring-inset ring-blue-700/10">
+                  {shop.deliveryWeekday}
                 </p>
               )}
             </div>
@@ -209,6 +216,23 @@ function Field({ label, value, onChange, type = 'text', required = false }) {
         onChange={(e) => onChange(e.target.value)}
         className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs font-medium outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
       />
+    </label>
+  );
+}
+
+function SelectField({ label, value, onChange, options }) {
+  return (
+    <label className="block">
+      <span className="mb-1 block text-xs font-bold text-slate-700">{label}</span>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs font-medium outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+      >
+        {options.map((opt) => (
+          <option key={opt.value} value={opt.value}>{opt.label}</option>
+        ))}
+      </select>
     </label>
   );
 }
