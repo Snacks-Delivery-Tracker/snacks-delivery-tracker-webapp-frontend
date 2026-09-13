@@ -121,46 +121,66 @@ export function ShopDetailsPage() {
           </div>
         </form>
       ) : (
-        <section className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
-          <div className="flex justify-between gap-3">
-            <div>
-              <h1 className="text-base font-extrabold text-slate-900">{shop.name}</h1>
-              <p className="mt-1 text-xs text-slate-500">{shop.address}</p>
-              {shop.ownerName && (
-                <p className="mt-2 text-xs font-semibold text-slate-700">
-                  Owner: {shop.ownerName} ({shop.ownerNumber})
-                </p>
-              )}
-              {shop.ownerEmail && (
-                <p className="mt-0.5 text-xs text-slate-400">
-                  {shop.ownerEmail}
-                </p>
-              )}
-              {shop.deliveryWeekday && (
-                <p className="mt-2 inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-semibold text-blue-700 ring-1 ring-inset ring-blue-700/10">
-                  {shop.deliveryWeekday}
-                </p>
+        <>
+          <section className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
+            <div className="flex justify-between gap-3">
+              <div>
+                <h1 className="text-base font-extrabold text-slate-900">{shop.name}</h1>
+                <p className="mt-1 text-xs text-slate-500">{shop.address}</p>
+                {shop.ownerName && (
+                  <p className="mt-2 text-xs font-semibold text-slate-700">
+                    Owner: {shop.ownerName} ({shop.ownerNumber})
+                  </p>
+                )}
+                {shop.ownerEmail && (
+                  <p className="mt-0.5 text-xs text-slate-400">
+                    {shop.ownerEmail}
+                  </p>
+                )}
+                {shop.deliveryWeekday && (
+                  <p className="mt-2 inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-semibold text-blue-700 ring-1 ring-inset ring-blue-700/10">
+                    {shop.deliveryWeekday}
+                  </p>
+                )}
+              </div>
+              {shop.ownerNumber && (
+                <a
+                  className="grid h-10 w-10 place-items-center rounded-full bg-blue-50 text-blue-700 hover:bg-blue-100"
+                  href={`tel:${shop.ownerNumber}`}
+                >
+                  <Phone size={18} />
+                </a>
               )}
             </div>
-            {shop.ownerNumber && (
-              <a
-                className="grid h-10 w-10 place-items-center rounded-full bg-blue-50 text-blue-700 hover:bg-blue-100"
-                href={`tel:${shop.ownerNumber}`}
-              >
-                <Phone size={18} />
-              </a>
-            )}
-          </div>
 
-          <div className="mt-4 border-t border-slate-100 pt-4">
-            <AmountTriplet
-              total={shop.totalOutstandingBalance}
-              collected={shop.creditBalance}
-              pending={shop.totalOutstandingBalance}
-            />
-          </div>
-          <p className="mt-2 text-center text-[11px] text-slate-400">Outstanding balance and available credit</p>
-        </section>
+            <div className="mt-4 border-t border-slate-100 pt-4">
+              <AmountTriplet
+                total={shop.activeBilled}
+                collected={shop.activeReceived}
+                pending={shop.activePending}
+              />
+            </div>
+            <p className="mt-2 text-center text-[11px] text-slate-400">Current active line delivery</p>
+          </section>
+
+          <section className="mt-5 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
+            <h2 className="text-sm font-extrabold text-slate-900 mb-3">Lifetime Summary</h2>
+            <div className="grid grid-cols-3 gap-2 text-center">
+              <div className="rounded-xl bg-slate-50 p-3">
+                <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-500">Billed</span>
+                <span className="mt-1 block text-sm font-black text-slate-800">₹{shop.lifetimeBilled || 0}</span>
+              </div>
+              <div className="rounded-xl bg-emerald-50 p-3">
+                <span className="block text-[10px] font-bold uppercase tracking-wider text-emerald-600">Received</span>
+                <span className="mt-1 block text-sm font-black text-emerald-700">₹{shop.lifetimeReceived || 0}</span>
+              </div>
+              <div className="rounded-xl bg-red-50 p-3">
+                <span className="block text-[10px] font-bold uppercase tracking-wider text-red-600">Pending</span>
+                <span className="mt-1 block text-sm font-black text-red-700">₹{Math.max(0, (shop.lifetimeBilled || 0) - (shop.lifetimeReceived || 0))}</span>
+              </div>
+            </div>
+          </section>
+        </>
       )}
 
       <section className="mt-5">

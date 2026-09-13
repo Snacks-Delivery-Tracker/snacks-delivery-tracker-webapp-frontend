@@ -284,9 +284,7 @@ function ShopPaymentRow({ shop, lineId, isOpen, onRemove, removing, onPaymentCol
       cardBorderClass = 'border-amber-200 bg-amber-50/30';
       statusDot = <span className="h-2 w-2 rounded-full bg-amber-500 shrink-0 animate-pulse" title="Unpaid" />;
     }
-  } else if (shop.lineSummary?.startingOutstanding > 0) {
-      // Just manually loaded, no delivery yet
-  } else if (shop.deliveryWeekday) { // Or we could check line summary lineType, but weekday logic is simpler if we assume weekday loaded has red card
+  } else if (shop.lineSummary?.startingOutstanding > 0 || shop.deliveryWeekday) {
       cardBorderClass = 'border-red-400 bg-red-50/50';
   }
 
@@ -355,7 +353,11 @@ function ShopPaymentRow({ shop, lineId, isOpen, onRemove, removing, onPaymentCol
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
-                navigate(`/deliveries/${shop.latestOrder._id}/bill`);
+                if (isOpen) {
+                  navigate(`/deliveries/${shop.latestOrder._id}/bill`);
+                } else {
+                  navigate(`/lines/${lineId}/shop-bill/${shop._id}`);
+                }
               }}
               title="View & Download Shop Bill"
               className="flex items-center gap-1 rounded-lg bg-slate-100 px-2 py-1.5 text-[10px] font-bold text-slate-700 transition hover:bg-slate-200"
