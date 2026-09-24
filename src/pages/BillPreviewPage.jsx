@@ -6,13 +6,63 @@ import { ErrorState, LoadingState, PageHeader, PrimaryButton } from '../componen
 import { formatDate, formatTime } from '../utils/format';
 
 export function BillPreviewPage() {
-  const { orderId } = useParams();
+  const { orderId, lineId, shopId } = useParams();
   const [delivery, setDelivery] = useState(null);
   const [error, setError] = useState('');
-  useEffect(() => { api.getDelivery(orderId).then(setDelivery).catch((requestError) => setError(requestError.message)); }, [orderId]);
+  useEffect(() => {
+    if (orderId) {
+      api.getDelivery(orderId).then(setDelivery).catch((requestError) => setError(requestError.message));
+    } else if (lineId && shopId) {
+      api.getShopBillFromSnapshot(lineId, shopId).then(setDelivery).catch((requestError) => setError(requestError.message));
+    }
+  }, [orderId, lineId, shopId]);
   const print = () => window.print();
   const share = () => navigator.share?.({ title: `Bill – ${delivery.shopId.name}`, text: `Total ₹${delivery.totalPayableAmount}` });
   if (error) return <ErrorState message={error} />;
   if (!delivery) return <LoadingState label="Preparing bill…" />;
-  return <><PageHeader title="Bill Preview" back action={<button onClick={share} aria-label="Share bill"><Share2 size={19} /></button>} /><article className="print-sheet rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><div className="border-b-2 border-slate-800 pb-4"><h1 className="text-sm font-black uppercase tracking-wide text-slate-900">Snacks Deliters</h1><p className="mt-1 text-[11px] text-slate-500">Delivery receipt</p><div className="mt-4 flex justify-between text-[11px] text-slate-600"><span>{delivery.shopId.name}<br />{delivery.shopId.address}</span><span className="text-right">Date: {formatDate(delivery.orderDate)}<br />Time: {formatTime(delivery.orderDate)}</span></div></div><table className="mt-4 w-full text-left text-[11px]"><thead className="border-y border-slate-300 bg-slate-50 text-slate-600"><tr><th className="px-1 py-2">#</th><th className="px-1 py-2">Item</th><th className="px-1 py-2 text-right">Qty</th><th className="px-1 py-2 text-right">Rate</th><th className="px-1 py-2 text-right">Amount</th></tr></thead><tbody>{delivery.items.length ? <> {delivery.items.map((item, index) => <tr key={item._id} className="border-b border-slate-100"><td className="px-1 py-2">{index + 1}</td><td className="px-1 py-2">{item.snackId.name}</td><td className="px-1 py-2 text-right">{item.orderedQuantity}</td><td className="px-1 py-2 text-right">₹{item.unitPrice}</td><td className="px-1 py-2 text-right">₹{item.totalPrice}</td></tr>)} <tr className="border-t border-slate-300 font-bold text-slate-800"><td colSpan="2" className="px-1 py-2 text-right">Total Qty:</td><td className="px-1 py-2 text-right">{delivery.items.reduce((sum, item) => sum + item.orderedQuantity, 0)}</td><td colSpan="2"></td></tr> </> : <tr><td colSpan="4" className="px-1 py-3 text-slate-500">Quick amount delivery</td><td className="px-1 py-3 text-right font-bold">₹{delivery.totalPayableAmount}</td></tr>}</tbody></table><div className="ml-auto mt-5 max-w-48 space-y-2 text-right text-xs"><p>Total amount <strong className="ml-5 text-slate-900">₹{delivery.totalPayableAmount}</strong></p><p>Collected amount <strong className="ml-5 text-emerald-600">₹{delivery.collectedAmount}</strong></p><p className="border-t border-slate-200 pt-2">Pending amount <strong className="ml-5 text-red-500">₹{delivery.deliveryPendingAmount}</strong></p></div></article><div className="mt-5 grid grid-cols-2 gap-3 print:hidden"><PrimaryButton onClick={print}><Printer size={18} /> Print / save PDF</PrimaryButton><button onClick={print} className="flex min-h-12 items-center justify-center gap-2 rounded-xl border border-blue-200 bg-white text-sm font-bold text-blue-700"><Download size={18} /> Download PDF</button></div></>;
+  return <><PageHeader title="Bill Preview" back action={<button onClick={share} aria-label="Share bill"><Share2 size={19} /></button>} /><article className="print-sheet rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><div className="border-b-2 border-slate-800 pb-4"><h1 className="text-sm font-black uppercase tracking-wide text-slate-900">Snacks Deliters</h1><p className="mt-1 text-[11px] text-slate-500">Delivery receipt</p><div className="mt-4 flex justify-between text-[11px] text-slate-600"><span>{delivery.shopId.name}<br />{delivery.shopId.address}</span><span className="text-right">Date: {formatDate(delivery.orderDate || delivery.createdAt)}<br />Time: {formatTime(delivery.orderDate || delivery.createdAt)}</span></div></div><table className="mt-4 w-full text-left text-[11px]"><thead className="border-y border-slate-300 bg-slate-50 text-slate-600"><tr><th className="px-1 py-2">#</th><th className="px-1 py-2">Item</th><th className="px-1 py-2 text-right">Qty</th><th className="px-1 py-2 text-right">Rate</th><th className="px-1 py-2 text-right">Amount</th></tr></thead><tbody>{delivery.items.length ? <> {delivery.items.map((item, index) => <tr key={item._id} className="border-b border-slate-100"><td className="px-1 py-2">{index + 1}</td><td className="px-1 py-2">{item.snackId.name}</td><td className="px-1 py-2 text-right">{item.orderedQuantity}</td><td className="px-1 py-2 text-right">₹{item.unitPrice}</td><td className="px-1 py-2 text-right">₹{item.totalPrice}</td></tr>)} <tr className="border-t border-slate-300 font-bold text-slate-800"><td colSpan="2" className="px-1 py-2 text-right">Total Qty:</td><td className="px-1 py-2 text-right">{delivery.items.reduce((sum, item) => sum + item.orderedQuantity, 0)}</td><td colSpan="2"></td></tr> </> : <tr><td colSpan="4" className="px-1 py-3 text-slate-500">Quick amount delivery</td><td className="px-1 py-3 text-right font-bold">₹{delivery.totalPayableAmount}</td></tr>}</tbody></table>
+
+<div className="mt-6 border-t border-slate-200 pt-4">
+  <h2 className="mb-2 text-[11px] font-bold text-slate-800 uppercase tracking-wider">Payment History</h2>
+  {delivery.collectionPayments && delivery.collectionPayments.length > 0 ? (
+    <table className="w-full text-left text-[11px]">
+      <thead className="bg-slate-50 text-slate-600">
+        <tr>
+          <th className="px-1 py-1.5 font-semibold">Date</th>
+          <th className="px-1 py-1.5 font-semibold">Mode</th>
+          <th className="px-1 py-1.5 font-semibold text-right">Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        {delivery.collectionPayments.map((p, i) => (
+          <tr key={i} className="border-b border-slate-100 last:border-0">
+            <td className="px-1 py-1.5 text-slate-600">{formatDate(p.paymentDate)} {formatTime(p.paymentDate)}</td>
+            <td className="px-1 py-1.5 text-slate-700">{p.paymentMode}</td>
+            <td className="px-1 py-1.5 text-right font-bold text-emerald-600">₹{p.amountPaid}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  ) : (
+    <p className="text-[10px] italic text-slate-500">No payments recorded yet.</p>
+  )}
+</div>
+
+{delivery.paymentBreakdown && Object.values(delivery.paymentBreakdown).some(v => v > 0) && (
+  <div className="mt-4 border-t border-slate-200 pt-4">
+    <h3 className="mb-2 text-[10px] font-bold text-slate-700 uppercase tracking-wider">Collection Summary</h3>
+    <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+      {Object.entries(delivery.paymentBreakdown).map(([mode, amount]) => (
+        amount > 0 && (
+          <div key={mode} className="rounded-lg bg-slate-50 p-2 text-center border border-slate-100">
+            <span className="block text-[9px] font-bold text-slate-500 uppercase">{mode.replace('_', ' ')}</span>
+            <span className="block text-xs font-black text-slate-800">₹{amount}</span>
+          </div>
+        )
+      ))}
+    </div>
+  </div>
+)}
+
+<div className="ml-auto mt-5 max-w-48 space-y-2 text-right text-xs"><p>Total amount <strong className="ml-5 text-slate-900">₹{delivery.totalPayableAmount}</strong></p><p>Collected amount <strong className="ml-5 text-emerald-600">₹{delivery.collectedAmount}</strong></p><p className="border-t border-slate-200 pt-2">Pending amount <strong className="ml-5 text-red-500">₹{delivery.deliveryPendingAmount}</strong></p></div></article><div className="mt-5 grid grid-cols-2 gap-3 print:hidden"><PrimaryButton onClick={print}><Printer size={18} /> Print / save PDF</PrimaryButton><button onClick={print} className="flex min-h-12 items-center justify-center gap-2 rounded-xl border border-blue-200 bg-white text-sm font-bold text-blue-700"><Download size={18} /> Download PDF</button></div></>;
 }

@@ -182,6 +182,50 @@ export function LineBillPreviewPage() {
                     </div>
                   )}
 
+                  {/* Payment History */}
+                  <div className="mt-4 border-t border-slate-200 pt-3">
+                    <h4 className="mb-2 text-[10px] font-bold text-slate-700 uppercase tracking-wider">Payment History</h4>
+                    {shop.payments && shop.payments.length > 0 ? (
+                      <table className="w-full text-left text-[10px]">
+                        <thead className="bg-slate-50 text-slate-500">
+                          <tr>
+                            <th className="px-1.5 py-1 font-semibold">Date</th>
+                            <th className="px-1.5 py-1 font-semibold">Mode</th>
+                            <th className="px-1.5 py-1 font-semibold text-right">Amount</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {shop.payments.map((p, i) => (
+                            <tr key={i} className="border-b border-slate-100 last:border-0">
+                              <td className="px-1.5 py-1 text-slate-600">{formatDate(p.paymentDate)} {formatTime(p.paymentDate)}</td>
+                              <td className="px-1.5 py-1 text-slate-700">{p.paymentMode}</td>
+                              <td className="px-1.5 py-1 text-right font-bold text-emerald-600">₹{p.amountPaid}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    ) : (
+                      <p className="text-[10px] italic text-slate-400">No payments recorded.</p>
+                    )}
+                  </div>
+
+                  {/* Collection Summary */}
+                  {shop.paymentBreakdown && Object.values(shop.paymentBreakdown).some(v => v > 0) && (
+                    <div className="mt-4 border-t border-slate-200 pt-3">
+                      <h4 className="mb-2 text-[10px] font-bold text-slate-700 uppercase tracking-wider">Collection Summary</h4>
+                      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                        {Object.entries(shop.paymentBreakdown).map(([mode, amount]) => (
+                          amount > 0 && (
+                            <div key={mode} className="rounded-md bg-slate-50 p-2 text-center border border-slate-100">
+                              <span className="block text-[8px] font-bold text-slate-500 uppercase">{mode.replace('_', ' ')}</span>
+                              <span className="block text-[11px] font-black text-slate-800">₹{amount}</span>
+                            </div>
+                          )
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   {/* Individual Shop Totals */}
                   <div className="ml-auto mt-3 max-w-56 space-y-1.5 border-t border-slate-200 pt-2.5 text-right text-xs">
                     <p className="text-slate-600">

@@ -10,8 +10,12 @@ import { useState } from 'react';
 export function HomePage() {
   const { line, isLoading, error, refreshLine } = useLine();
   const navigate = useNavigate();
-  const recentOrders = line?.shops.flatMap((shop) => shop.orders.map((order) => ({ ...order, shop })))
-    .sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate)).slice(0, 4) || [];
+  const recentOrders = line?.shops.flatMap((shop) => shop.orders.map((order) => ({ 
+    ...order, 
+    shop,
+    collectedAmount: shop.collectedAmount,
+    deliveryPendingAmount: shop.pendingAmount
+  }))).sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate)).slice(0, 4) || [];
 
   const [showCreateModal, setShowCreateModal] = useState(false);
 
