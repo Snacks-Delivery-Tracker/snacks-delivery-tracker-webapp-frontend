@@ -21,6 +21,7 @@ async function request(path, options = {}) {
 export const api = {
   getCurrentLine: () => request('/line/current'),
   getLine: (lineId) => request(`/line/${lineId}`),
+  getShopBillFromSnapshot: (lineId, shopId) => request(`/line/${lineId}/shop-bill/${shopId}`),
   listLines: () => request('/line'),
   createLine: (data) => request('/line', { method: 'POST', body: JSON.stringify(data) }),
   addShopToLine: (lineId, shopId) => request(`/line/${lineId}/shops`, {
