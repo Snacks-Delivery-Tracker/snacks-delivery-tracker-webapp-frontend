@@ -45,9 +45,10 @@ export function AmountTriplet({ total = 0, collected = 0, pending = 0, compact =
 export function ConfirmDialog({ title, description, confirmLabel, onConfirm, onCancel, loading = false }) {
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/50 p-4 backdrop-blur-sm sm:items-center"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-sm"
       role="presentation"
       onMouseDown={(event) => event.target === event.currentTarget && !loading && onCancel()}
+      onTouchEnd={(event) => event.target === event.currentTarget && !loading && onCancel()}
     >
       <section
         role="alertdialog"

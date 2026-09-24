@@ -143,13 +143,13 @@ export function SnackPickerPage() {
                   <Pencil size={13} /> Edit
                 </button>
                 <button
-                type="button"
-                onClick={(e) => handleDeleteClick(snack._id, snack.name, e)}
-                title="Delete snack"
-                className="p-1.5 text-slate-300 transition hover:text-red-500"
-              >
-                <Trash2 size={16} />
-              </button>
+                  type="button"
+                  onClick={(e) => handleDeleteClick(snack._id, snack.name, e)}
+                  title="Delete snack"
+                  className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-300 transition hover:bg-red-50 hover:text-red-500 active:bg-red-100"
+                >
+                  <Trash2 size={16} />
+                </button>
               </div>
             </div>
           ))}

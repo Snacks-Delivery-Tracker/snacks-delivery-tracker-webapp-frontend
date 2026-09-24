@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Trash2 } from 'lucide-react';
 import { api } from '../api/client';
-import { LoadingState, PageHeader, PrimaryButton } from '../components/Page';
+import { ConfirmDialog, LoadingState, PageHeader, PrimaryButton } from '../components/Page';
 
 const SNACK_CATEGORIES = [
   'SNACKS',
@@ -30,6 +30,7 @@ export function NewSnackPage({ editing = false }) {
   const [loading, setLoading] = useState(isEditMode);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
@@ -115,11 +116,8 @@ export function NewSnackPage({ editing = false }) {
     }
   };
 
-  const handleDelete = async () => {
+  const confirmDelete = async () => {
     if (!snackId) return;
-    if (!window.confirm(`Are you sure you want to permanently delete "${form.name}"?`)) {
-      return;
-    }
     setDeleting(true);
     setError('');
     try {
@@ -142,7 +140,7 @@ export function NewSnackPage({ editing = false }) {
           isEditMode ? (
             <button
               type="button"
-              onClick={handleDelete}
+              onClick={() => setShowDeleteConfirm(true)}
               disabled={deleting}
               className="flex items-center gap-1 rounded-lg bg-red-500/20 px-2.5 py-1.5 text-xs font-bold text-red-100 hover:bg-red-500/30 disabled:opacity-50"
             >
@@ -242,7 +240,7 @@ export function NewSnackPage({ editing = false }) {
           {isEditMode && (
             <button
               type="button"
-              onClick={handleDelete}
+              onClick={() => setShowDeleteConfirm(true)}
               disabled={deleting}
               className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-red-200 bg-red-50 py-3 text-xs font-bold text-red-600 hover:bg-red-100 disabled:opacity-50"
             >
@@ -251,6 +249,17 @@ export function NewSnackPage({ editing = false }) {
           )}
         </div>
       </form>
+
+      {showDeleteConfirm && (
+        <ConfirmDialog
+          title={`Delete "${form.name}"?`}
+          description="This snack will be permanently removed from the catalog. This cannot be undone."
+          confirmLabel="Delete Snack"
+          loading={deleting}
+          onConfirm={confirmDelete}
+          onCancel={() => setShowDeleteConfirm(false)}
+        />
+      )}
     </>
   );
 }
